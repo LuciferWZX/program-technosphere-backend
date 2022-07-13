@@ -1,18 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './interceptor/transform.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api'); //设置请求的前缀
+  const configService = app.get(ConfigService);
+  const http = configService.get('http');
+  app.setGlobalPrefix(http.app_global_prefix); //设置请求的前缀
   app.useGlobalPipes(new ValidationPipe());
   // 全局注册错误的过滤器
   app.useGlobalFilters(new HttpExceptionFilter());
   // 全局注册拦截器
   app.useGlobalInterceptors(new TransformInterceptor());
-  await app.listen(3000);
+  await app.listen(http.app_port, () => {
+    Logger.log(
+      `[${process.env.NODE_ENV}]已启动：http://localhost:${http.app_port}/${http.app_global_prefix}`,
+    );
+  });
 }
 
 /**

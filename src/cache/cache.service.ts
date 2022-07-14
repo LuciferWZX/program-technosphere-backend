@@ -6,9 +6,7 @@ export class CacheService {
   public redisClient;
 
   constructor(private redisService: RedisService) {
-    this.getRedisClient().then(() => {
-      console.info('redis连接成功');
-    });
+    this.getRedisClient().then();
   }
 
   /**
@@ -16,6 +14,9 @@ export class CacheService {
    */
   async getRedisClient() {
     this.redisClient = await this.redisService.getClient();
+    if (this.redisClient) {
+      console.info('redis连接成功');
+    }
   }
   /**
    * @Description: 封装设置redis缓存的方法

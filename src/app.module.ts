@@ -3,6 +3,7 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
+  RequestMethod,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,6 +14,8 @@ import { Connection } from 'typeorm';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from '../config/configuration';
+import { AuthorityMiddleware } from './middleware/authority.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Dependencies(Connection)
 @Module({
@@ -52,13 +55,21 @@ import configuration from '../config/configuration';
     // }),
     UserModule,
     CacheModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer
+      .apply(AuthorityMiddleware)
+      .forRoutes({
+        path: 'user/test',
+        method: RequestMethod.ALL,
+      })
+      .apply(LoggerMiddleware)
+      .forRoutes('*');
   }
 
   constructor(private readonly connection: Connection) {}

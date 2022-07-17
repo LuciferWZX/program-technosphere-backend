@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class CacheService {
-  public redisClient;
+  public redisClient: Redis;
 
   constructor(private redisService: RedisService) {
     this.getRedisClient().then();
@@ -26,7 +27,11 @@ export class CacheService {
    * @return: Promise<any>
    */
   //设置值的方法
-  public async set(key: string, value: unknown, seconds?: number) {
+  public async set(
+    key: string,
+    value: string | number | Buffer,
+    seconds?: number,
+  ) {
     value = JSON.stringify(value);
     if (!this.redisClient) {
       await this.getRedisClient();
@@ -36,6 +41,14 @@ export class CacheService {
     } else {
       await this.redisClient.set(key, value, 'EX', seconds);
     }
+  }
+  //设置值的方法hash
+  public async hSet(key: string, mapKey: string, value: any) {
+    value = JSON.stringify(value);
+    if (!this.redisClient) {
+      await this.getRedisClient();
+    }
+    await this.redisClient.hset(key, mapKey, value);
   }
   //获取值的方法
   public async get<T>(key: string): Promise<T | undefined> {
@@ -48,6 +61,17 @@ export class CacheService {
     }
     return JSON.parse(data);
   }
+  //获取值的方法
+  public async hGet<T>(key: string, mapKey: string): Promise<T | undefined> {
+    if (!this.redisClient) {
+      await this.getRedisClient();
+    }
+    const data = await this.redisClient.hget(key, mapKey);
+    if (!data) {
+      return undefined;
+    }
+    return JSON.parse(data);
+  }
 
   //获取值的方法
   public async del(key: string) {
@@ -55,6 +79,13 @@ export class CacheService {
       await this.getRedisClient();
     }
     await this.redisClient.del(key);
+  }
+  //删除hash的key
+  public async hDel(key: string, mapKey: string) {
+    if (!this.redisClient) {
+      await this.getRedisClient();
+    }
+    await this.redisClient.hdel(key, mapKey);
   }
   // 清理缓存
   public async flushall(): Promise<any> {

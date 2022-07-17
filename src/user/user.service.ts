@@ -36,7 +36,6 @@ export class UserService {
         },
       ],
     });
-    console.log(existUser);
     if (existUser) {
       let message = '';
       if (existUser.email === email) {
@@ -49,6 +48,7 @@ export class UserService {
       throw new HttpException(
         {
           message: message,
+          code: 10000,
         },
         400,
       );
@@ -60,5 +60,40 @@ export class UserService {
       nickname,
       username,
     });
+  }
+
+  /**
+   * 使用邮箱登录
+   * @param email
+   * @param password
+   */
+  async emailLogin(email: string, password: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: {
+        email: email,
+        password: password,
+      },
+    });
+    if (!user) {
+      //说明没有注册过，或者邮箱密码错误
+      throw new HttpException(
+        {
+          message: '邮箱或者密码错误，请输入正确的邮箱和密码',
+          code: 10001,
+        },
+        401,
+      );
+    }
+    if (user.banned) {
+      //说明用户被ban了，无法使用，需要联系管理员去询问原因
+      throw new HttpException(
+        {
+          message: '该用户已被禁用，请联系管理员',
+          code: 10002,
+        },
+        401,
+      );
+    }
+    return user;
   }
 }

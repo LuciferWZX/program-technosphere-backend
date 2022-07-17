@@ -13,8 +13,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
-    Logger.log('错误提示', exception.message);
+    Logger.log('错误提示', exception.response.code);
     let msg;
+    let code = 10000;
+    if (exception.response?.code !== undefined) {
+      code = exception.response.code;
+    }
     if (typeof exception.response.message === 'string') {
       msg = exception.response.message;
     } else {
@@ -25,7 +29,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
     const errorResponse = {
       message: msg,
-      code: 1, // 自定义code
+      code: code, // 自定义code
       url: request.originalUrl, // 错误的url地址
     };
     const status =

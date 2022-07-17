@@ -23,7 +23,7 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 20, unique: true })
   username: string;
   @Length(6, 20)
-  @Column()
+  @Column({ select: false }) //将密码过滤掉
   password: string;
   @CreateDateColumn()
   createdDate: Date;
@@ -31,4 +31,6 @@ export class User extends BaseEntity {
   updatedDate: Date;
   @Column({ type: 'enum', enum: Authority, default: Authority.user })
   authority: Authority;
+  @Column({ type: 'boolean', default: false })
+  banned: boolean;
 }

@@ -28,7 +28,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
           : exception.response.message;
     }
     const errorResponse = {
-      message: msg,
+      msg: msg,
       code: code, // 自定义code
       url: request.originalUrl, // 错误的url地址
     };

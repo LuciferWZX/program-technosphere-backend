@@ -10,7 +10,7 @@ export class AuthorityMiddleware implements NestMiddleware {
     private readonly cacheService: CacheService,
   ) {}
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const token = req.header('token');
+    const token = req.header('authorization');
     //验证token是否正确
     const user = await tokenVerify(token, this.cacheService, this.authService);
     console.log('权限校验...', user);

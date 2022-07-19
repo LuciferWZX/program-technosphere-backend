@@ -2,12 +2,16 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entity/user.entity';
 import { Repository } from 'typeorm';
+import { CacheService } from '../cache/cache.service';
+import { clearOnlineUser, getOnlineUser } from './utils';
+import { HashMapKey } from '../types/cache-type';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly cacheService: CacheService,
   ) {}
 
   /**
@@ -95,5 +99,22 @@ export class UserService {
       );
     }
     return user;
+  }
+
+  /**
+   * 退出登录，清除redis的在线该用户
+   * @param token
+   */
+  async logout(token: string): Promise<boolean> {
+    //先通过token查找该用户
+    const user = await getOnlineUser(
+      token,
+      HashMapKey.OnlineUsersToken,
+      this.cacheService,
+    );
+    if (user) {
+      await clearOnlineUser(token, user.id, this.cacheService);
+    }
+    return true;
   }
 }

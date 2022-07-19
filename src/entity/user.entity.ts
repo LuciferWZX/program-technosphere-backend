@@ -5,7 +5,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Authority } from './type';
+import { Authority, Sex } from './type';
 import { IsEmail, Length } from 'class-validator';
 @Entity({
   name: 'tb_user',
@@ -31,6 +31,8 @@ export class User extends BaseEntity {
   updatedDate: Date;
   @Column({ type: 'enum', enum: Authority, default: Authority.user })
   authority: Authority;
+  @Column({ type: 'enum', enum: Sex, default: Sex.TwoDimensional })
+  sex: Sex;
   @Column({ type: 'boolean', default: false })
   banned: boolean;
 }

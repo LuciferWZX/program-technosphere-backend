@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Bind, Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { EController } from '../constants/controller';
 import { LoginByEmailDto } from './dtos/login-by-email.dto';
 import { CacheService } from '../cache/cache.service';
@@ -52,6 +52,15 @@ export class UserController {
       ...user,
       token: token,
     };
+  }
+  @Post('logout')
+  @Bind(Req())
+  async logout(request) {
+    const token = request.headers?.authorization;
+    if (token) {
+      await this.userService.logout(token);
+    }
+    return null;
   }
   @Get('/test')
   async test() {

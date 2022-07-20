@@ -6,6 +6,7 @@ import { UserService } from './user.service';
 import { RegisterByEmailDto } from './dtos/register-by-email.dto';
 import { AuthService } from '../auth/auth.service';
 import { updateOnlineUser } from './utils';
+import { getDevice } from '../utils/util';
 
 @Controller(EController.User)
 export class UserController {
@@ -15,6 +16,13 @@ export class UserController {
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
+
+  @Get('fetch_user_info')
+  @Bind(Req())
+  async fetchUserInfo(request) {
+    const token = request.headers?.authorization;
+    return await this.userService.fetchUserInfoByToken(token);
+  }
 
   /**
    * 使用邮箱注册 @todo（今晚需要配置邮箱+验证码进行注册）
@@ -40,13 +48,19 @@ export class UserController {
    * @param loginByEmail
    */
   @Post('login_with_email')
-  async emailLogin(@Body() loginByEmail: LoginByEmailDto) {
+  @Bind(Req())
+  async emailLogin(request, @Body() loginByEmail: LoginByEmailDto) {
     const { email, password, keepLogin } = loginByEmail;
     if (keepLogin) {
       //@todo
     }
     const user = await this.userService.emailLogin(email, password);
     const token = await this.authService.generateToken(user.username, user.id);
+    const deviceAgent = request.headers['user-agent'].toLowerCase();
+    user.device = getDevice(deviceAgent);
+    console.log({
+      deviceAgent,
+    });
     await updateOnlineUser(token, user, this.cacheService);
     return {
       ...user,

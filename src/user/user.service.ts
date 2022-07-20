@@ -113,8 +113,31 @@ export class UserService {
       this.cacheService,
     );
     if (user) {
-      await clearOnlineUser(token, user.id, this.cacheService);
+      await clearOnlineUser(token, user, this.cacheService);
     }
     return true;
+  }
+
+  /**
+   * 通过token查找用户信息
+   * @param token
+   */
+  async fetchUserInfoByToken(token: string): Promise<User> {
+    //先通过token查找该用户
+    const user = await getOnlineUser(
+      token,
+      HashMapKey.OnlineUsersToken,
+      this.cacheService,
+    );
+    if (!user) {
+      throw new HttpException(
+        {
+          message: '该用户已过期，请重新登录',
+          code: 10001,
+        },
+        401,
+      );
+    }
+    return user;
   }
 }

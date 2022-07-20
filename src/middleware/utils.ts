@@ -3,7 +3,6 @@ import { AuthService } from '../auth/auth.service';
 import { clearOnlineUser, getOnlineUser } from '../user/utils';
 import { HashMapKey } from '../types/cache-type';
 import { User } from '../entity/user.entity';
-import { HttpException } from '@nestjs/common';
 
 export const tokenVerify = async (
   token: string,
@@ -20,7 +19,7 @@ export const tokenVerify = async (
     //辅助校验这个用户是否过期
     authService.validate(token).catch((_) => {
       //说明已过期，删除掉redis里面的数据
-      clearOnlineUser(token, user.id, cacheService);
+      clearOnlineUser(token, user, cacheService);
       return user;
     });
   }

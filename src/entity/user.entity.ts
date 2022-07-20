@@ -5,7 +5,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Authority, Sex } from './type';
+import { Authority, LoginDevice, Sex } from './type';
 import { IsEmail, Length } from 'class-validator';
 @Entity({
   name: 'tb_user',
@@ -35,4 +35,6 @@ export class User extends BaseEntity {
   sex: Sex;
   @Column({ type: 'boolean', default: false })
   banned: boolean;
+  device: LoginDevice;
+  token: string;
 }

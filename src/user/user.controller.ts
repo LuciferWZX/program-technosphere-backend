@@ -58,9 +58,6 @@ export class UserController {
     const token = await this.authService.generateToken(user.username, user.id);
     const deviceAgent = request.headers['user-agent'].toLowerCase();
     user.device = getDevice(deviceAgent);
-    console.log({
-      deviceAgent,
-    });
     await updateOnlineUser(token, user, this.cacheService);
     return {
       ...user,

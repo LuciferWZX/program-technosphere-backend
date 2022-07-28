@@ -6,8 +6,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { CacheService } from './cache/cache.service';
+import { HashMapKey } from './types/cache-type';
+import { User } from './entity/user.entity';
+@Injectable()
 @WebSocketGateway({
   path: '/socket',
   allowEIO3: true,
@@ -20,12 +24,12 @@ import { Server, Socket } from 'socket.io';
 export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  private logger: Logger = new Logger('ChatGateway');
+  private logger: Logger = new Logger('WebSocketGateway');
   @WebSocketServer() private ws: Server; // socket实例
   private connectCounts = 0; // 当前在线人数
   private allNum = 0; // 全部在线人数
-  private users: any = {}; // 人数信息
-
+  private users: Map<string, any> = new Map(); // 人数信息
+  constructor(private readonly cacheService: CacheService) {}
   /**
    *初始化
    */
@@ -37,18 +41,19 @@ export class AppGateway
    * 连接成功
    * @param client
    */
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const auth: { [p: string]: any } = client.handshake.auth;
     this.logger.log('登录的用户：', auth.token);
     this.connectCounts += 1;
     this.allNum += 1;
-    this.users[client.id] = `user-${this.connectCounts}`;
-    this.ws.emit('enter', {
-      name: this.users[client.id],
-      allNum: this.allNum,
-      connectCounts: this.connectCounts,
-    });
-    client.emit('enterName', this.users[client.id]);
+    const user: User = await this.cacheService.hGet(
+      HashMapKey.OnlineUsersToken,
+      `online:${auth.token}`,
+    );
+    this.users.set(`${auth.token}**${client.id}`, user);
+
+    this.ws.emit('enter', this.users.get(`${auth.token}**${client.id}`));
+    //client.emit('enterName', this.users[client.id]);
   }
 
   /**
@@ -56,7 +61,10 @@ export class AppGateway
    * @param client
    */
   handleDisconnect(client: Socket) {
+    const auth: { [p: string]: any } = client.handshake.auth;
+    console.log('已经离开:', `${auth.token}**${client.id}`);
     this.allNum -= 1;
+    this.users.delete(`${auth.token}-${client.id}`);
     this.ws.emit('leave', {
       name: this.users[client.id],
       allNum: this.allNum,
@@ -69,17 +77,18 @@ export class AppGateway
    * 监听发送消息
    */
   handleMessage(client: Socket, data: any) {
-    this.ws.emit('message', {
-      name: this.users[client.id],
-      say: data,
-    });
+    console.log('收到客户端传过来的数据：', data);
+    // this.ws.emit('message', {
+    //   name: this.users[client.id],
+    //   say: data,
+    // });
   }
   @SubscribeMessage('name')
   /**
    * 监听修改名称
    */
   handleName(client: Socket, data: any): void {
-    this.users[client.id] = data;
-    client.emit('name', this.users[client.id]);
+    // this.users[client.id] = data;
+    // client.emit('name', this.users[client.id]);
   }
 }

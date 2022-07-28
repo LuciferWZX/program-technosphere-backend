@@ -18,11 +18,6 @@ export const updateOnlineUser = async (
     HashMapKey.OnlineUsersId,
     `online:${user.id}`,
   );
-  // if (onlineUser) {
-  //   //因为id不变，所以id的会覆盖掉
-  //   //token是新的，所以token就需要把之前的删掉再赋值
-  //   await clearOnlineUser(onlineUser.token, onlineUser.id, cacheService);
-  // }
   if (userDevices && userDevices.length > 0) {
     //列表有值
     const existUser = userDevices.find((_user) => _user.device === user.device);

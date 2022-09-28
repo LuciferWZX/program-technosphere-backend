@@ -1,1 +1,1 @@
-CREATE DATABASE program_tech;
+CREATE DATABASE data_center;

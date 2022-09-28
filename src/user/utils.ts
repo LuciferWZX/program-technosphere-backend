@@ -1,6 +1,8 @@
 import { User } from '../entity/user.entity';
 import { CacheService } from '../cache/cache.service';
 import { HashMapKey } from '../types/cache-type';
+import { IRedisUserInfo, LoginDevice } from '../entity/type';
+import * as dayjs from 'dayjs';
 
 /**
  * 更新redis用户信息
@@ -58,6 +60,37 @@ export const updateOnlineUser = async (
     token,
   });
 };
+
+//更新在线用户的状态(登录的时候)
+export const updateUserStatus = async (
+  newUser: User,
+  service: CacheService,
+) => {
+  //查询用户在该设备上是否登录
+  const userInfo: IRedisUserInfo | undefined = await service.hGet(
+    HashMapKey.Users,
+    newUser.id,
+  );
+  if (userInfo?.[newUser.device]) {
+    //存在说明该用户是已经登录过的
+    userInfo[newUser.device] = {
+      user: newUser,
+      loginTime: dayjs().format(),
+    };
+    //将新的用户信息更新上去
+    await service.hSet(HashMapKey.Users, newUser.id, userInfo);
+  } else {
+    const newUserInfo: IRedisUserInfo = {
+      [newUser.device]: {
+        user: newUser,
+        loginTime: dayjs().format(),
+      },
+    };
+    //说明用户没有登录任何设备
+    await service.hSet(HashMapKey.Users, newUser.id, newUserInfo);
+  }
+};
+
 /**
  * 删除一个在线用户
  * @param token

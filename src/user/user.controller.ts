@@ -5,7 +5,7 @@ import { CacheService } from '../cache/cache.service';
 import { UserService } from './user.service';
 import { RegisterByEmailDto } from './dtos/register-by-email.dto';
 import { AuthService } from '../auth/auth.service';
-import { updateOnlineUser } from './utils';
+import { updateOnlineUser, updateUserStatus } from './utils';
 import { getDevice } from '../utils/util';
 
 @Controller(EController.User)
@@ -54,11 +54,17 @@ export class UserController {
     if (keepLogin) {
       //@todo
     }
+    //先检查用户📪和密码是否正确
     const user = await this.userService.emailLogin(email, password);
+    //生成token
     const token = await this.authService.generateToken(user.username, user.id);
+    //当前登录的设备
     const deviceAgent = request.headers['user-agent'].toLowerCase();
     user.device = getDevice(deviceAgent);
-    await updateOnlineUser(token, user, this.cacheService);
+    user.token = token;
+    // await updateOnlineUser(token, user, this.cacheService);
+    await updateUserStatus(user, this.cacheService);
+    //可以插入数据库
     return {
       ...user,
       token: token,

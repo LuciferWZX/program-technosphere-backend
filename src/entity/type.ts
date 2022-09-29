@@ -15,17 +15,13 @@ export enum LoginDevice {
   Web,
   Mobile,
 }
+
+export interface IDeviceInfo {
+  user: User;
+  loginTime: string;
+}
 export interface IRedisUserInfo {
-  [LoginDevice.App]?: {
-    user: User;
-    loginTime: string;
-  }; //桌面端
-  [LoginDevice.Web]?: {
-    user: User;
-    loginTime: string;
-  }; //浏览器端
-  [LoginDevice.Mobile]?: {
-    user: User;
-    loginTime: string;
-  }; //移动端
+  [LoginDevice.App]?: IDeviceInfo; //桌面端
+  [LoginDevice.Web]?: IDeviceInfo; //浏览器端
+  [LoginDevice.Mobile]?: IDeviceInfo; //移动端
 }

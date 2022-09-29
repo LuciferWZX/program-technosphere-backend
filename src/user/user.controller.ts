@@ -5,8 +5,9 @@ import { CacheService } from '../cache/cache.service';
 import { UserService } from './user.service';
 import { RegisterByEmailDto } from './dtos/register-by-email.dto';
 import { AuthService } from '../auth/auth.service';
-import { updateOnlineUser, updateUserStatus } from './utils';
+import { updateUserStatus } from './utils';
 import { getDevice } from '../utils/util';
+import { User } from '../entity/user.entity';
 
 @Controller(EController.User)
 export class UserController {
@@ -45,6 +46,7 @@ export class UserController {
 
   /**
    * 使用邮箱密码进行登录
+   * @param request
    * @param loginByEmail
    */
   @Post('login_with_email')
@@ -62,8 +64,8 @@ export class UserController {
     const deviceAgent = request.headers['user-agent'].toLowerCase();
     user.device = getDevice(deviceAgent);
     user.token = token;
-    // await updateOnlineUser(token, user, this.cacheService);
-    await updateUserStatus(user, this.cacheService);
+    //-----------处理redis里面的用户
+    await this.handleUserLogin(user);
     //可以插入数据库
     return {
       ...user,
@@ -82,5 +84,14 @@ export class UserController {
   @Get('/test')
   async test() {
     return 'this is test';
+  }
+
+  async handleUserLogin(user: User) {
+    const result = await updateUserStatus(user, this.cacheService);
+    if (result.action === 'update') {
+      console.log('update,发送socket信息给当前登录的用户，提示他被踢出了');
+    } else {
+      console.log('insert');
+    }
   }
 }

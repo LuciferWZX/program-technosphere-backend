@@ -89,7 +89,6 @@ export class UserController {
   @Bind(Req())
   async phoneLogin(request, @Body() loginByPhoneDto: LoginByPhoneDto) {
     const { phone, pin } = loginByPhoneDto;
-    console.log('2222', loginByPhoneDto);
     //先检查用户📪和密码是否正确
     const user = await this.userService.phoneLogin(phone, pin);
     //生成token
@@ -100,10 +99,6 @@ export class UserController {
     user.token = token;
     //-----------处理redis里面的用户
     await this.handleUserLogin(user);
-    console.log('1111', {
-      ...user,
-      token: token,
-    });
     //可以插入数据库
     return {
       ...user,

@@ -26,6 +26,8 @@ export class UserService {
     password: string,
     nickname: string,
     username: string,
+    pin: string,
+    phone: string,
   ): Promise<User> {
     const existUser = await this.userRepository.findOne({
       where: [
@@ -36,14 +38,20 @@ export class UserService {
           nickname: nickname,
         },
         {
+          pin: pin,
+        },
+        {
           username: username,
+        },
+        {
+          phone: phone,
         },
       ],
     });
     if (existUser) {
       let message = '';
-      if (existUser.email === email) {
-        message = '该邮箱已存在';
+      if (existUser.phone === phone) {
+        message = '该手机已存在';
       } else if (existUser.nickname === nickname) {
         message = '该昵称已存在';
       } else if (existUser.username === username) {
@@ -60,8 +68,10 @@ export class UserService {
 
     return this.userRepository.save({
       email,
+      phone,
       password,
       nickname,
+      pin,
       username,
     });
   }
@@ -83,6 +93,41 @@ export class UserService {
       throw new HttpException(
         {
           message: '邮箱或者密码错误，请输入正确的邮箱和密码',
+          code: 10001,
+        },
+        401,
+      );
+    }
+    if (user.banned) {
+      //说明用户被ban了，无法使用，需要联系管理员去询问原因
+      throw new HttpException(
+        {
+          message: '该用户已被禁用，请联系管理员',
+          code: 10002,
+        },
+        401,
+      );
+    }
+    return user;
+  }
+
+  /**
+   * 使用手机和PIN码登录
+   * @param phone
+   * @param pin
+   */
+  async phoneLogin(phone: string, pin: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: {
+        pin: pin,
+        phone: phone,
+      },
+    });
+    if (!user) {
+      //说明没有注册过，或者手机和PIN错误
+      throw new HttpException(
+        {
+          message: '电话号码或者PIN码错误',
           code: 10001,
         },
         401,

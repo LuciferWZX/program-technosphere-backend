@@ -8,6 +8,7 @@ import { AuthService } from '../auth/auth.service';
 import { updateUserStatus } from './utils';
 import { getDevice } from '../utils/util';
 import { User } from '../entity/user.entity';
+import { LoginByPhoneDto } from './dtos/login-by-phone.dto';
 
 @Controller(EController.User)
 export class UserController {
@@ -33,14 +34,16 @@ export class UserController {
   async emailRegistration(
     @Body() registerByEmailDto: RegisterByEmailDto,
   ): Promise<any> {
-    const { email, password, username, nickname } = registerByEmailDto;
+    const { email, password, username, nickname, pin, phone } =
+      registerByEmailDto;
     //this.cacheService.set('email', loginByEmailDto.email);
-
     return await this.userService.emailRegistration(
       email,
       password,
       nickname,
       username,
+      pin,
+      phone,
     );
   }
 
@@ -72,6 +75,29 @@ export class UserController {
       token: token,
     };
   }
+
+  @Post('login_with_phone')
+  @Bind(Req())
+  async phoneLogin(request, @Body() loginByPhoneDto: LoginByPhoneDto) {
+    const { phone, pin } = loginByPhoneDto;
+
+    //先检查用户📪和密码是否正确
+    const user = await this.userService.phoneLogin(phone, pin);
+    //生成token
+    const token = await this.authService.generateToken(user.username, user.id);
+    //当前登录的设备
+    const deviceAgent = request.headers['user-agent'].toLowerCase();
+    user.device = getDevice(deviceAgent);
+    user.token = token;
+    //-----------处理redis里面的用户
+    await this.handleUserLogin(user);
+    //可以插入数据库
+    return {
+      ...user,
+      token: token,
+    };
+  }
+
   @Post('logout')
   @Bind(Req())
   async logout(request) {

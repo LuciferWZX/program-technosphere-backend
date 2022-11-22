@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Authority, LoginDevice, Sex } from './type';
-import { IsEmail, Length } from 'class-validator';
+import { IsEmail, IsPhoneNumber, Length } from 'class-validator';
 @Entity({
   name: 'tb_user',
 })
@@ -16,6 +16,9 @@ export class User extends BaseEntity {
   @IsEmail()
   @Column({ unique: true })
   email: string;
+  @IsPhoneNumber('CN', { message: '请输入正确的手机号码' })
+  @Column({ unique: true })
+  phone: string;
   @Length(1, 18)
   @Column({ type: 'varchar', length: 20, unique: true })
   nickname: string;
@@ -25,6 +28,8 @@ export class User extends BaseEntity {
   @Length(6, 20)
   @Column({ select: false }) //将密码过滤掉
   password: string;
+  @Column({ select: false }) //将pin码过滤掉
+  pin: string;
   @CreateDateColumn()
   createdDate: Date;
   @CreateDateColumn()

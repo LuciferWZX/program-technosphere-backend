@@ -1,4 +1,12 @@
-import { Bind, Body, Controller, Get, Post, Req } from '@nestjs/common';
+import {
+  Bind,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { EController } from '../constants/controller';
 import { LoginByEmailDto } from './dtos/login-by-email.dto';
 import { CacheService } from '../cache/cache.service';
@@ -77,10 +85,11 @@ export class UserController {
   }
 
   @Post('login_with_phone')
+  @HttpCode(200)
   @Bind(Req())
   async phoneLogin(request, @Body() loginByPhoneDto: LoginByPhoneDto) {
     const { phone, pin } = loginByPhoneDto;
-
+    console.log('2222', loginByPhoneDto);
     //先检查用户📪和密码是否正确
     const user = await this.userService.phoneLogin(phone, pin);
     //生成token
@@ -91,6 +100,10 @@ export class UserController {
     user.token = token;
     //-----------处理redis里面的用户
     await this.handleUserLogin(user);
+    console.log('1111', {
+      ...user,
+      token: token,
+    });
     //可以插入数据库
     return {
       ...user,

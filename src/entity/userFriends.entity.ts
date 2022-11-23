@@ -16,8 +16,12 @@ export class UserFriendsEntity extends BaseEntity {
   fRecordId: string; ///是通过哪条记录添加的
   @Column({ nullable: false })
   senderId: string; ///发送方的id
+  @Column()
+  senderRemark: string; ///发送方对接收方的备注
   @Column({ nullable: false })
   receiverId: string; ///接收方的id
+  @Column()
+  receiverRemark: string; ///接收方对发送方的备注
   @CreateDateColumn()
   createdDate: Date; ///创建的时间
   @CreateDateColumn()

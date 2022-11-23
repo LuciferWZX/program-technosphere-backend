@@ -13,6 +13,11 @@ import { IsEmail, IsPhoneNumber, Length } from 'class-validator';
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+  @Column({
+    default:
+      'https://img2.baidu.com/it/u=3064904053,3191769934&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1669395600&t=e37c1279968e38084b5c2fde1b5dc939',
+  })
+  avatar: string;
   @IsEmail()
   @Column({ unique: true })
   email: string;

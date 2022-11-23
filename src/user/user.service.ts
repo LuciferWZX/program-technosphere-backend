@@ -20,6 +20,8 @@ export class UserService {
    * @param password
    * @param nickname
    * @param username
+   * @param pin
+   * @param phone
    */
   async emailRegistration(
     email: string,
@@ -38,9 +40,6 @@ export class UserService {
           nickname: nickname,
         },
         {
-          pin: pin,
-        },
-        {
           username: username,
         },
         {
@@ -48,10 +47,13 @@ export class UserService {
         },
       ],
     });
+    console.log(1111, existUser);
     if (existUser) {
       let message = '';
       if (existUser.phone === phone) {
         message = '该手机已存在';
+      } else if (existUser.email === email) {
+        message = '该邮箱已存在';
       } else if (existUser.nickname === nickname) {
         message = '该昵称已存在';
       } else if (existUser.username === username) {

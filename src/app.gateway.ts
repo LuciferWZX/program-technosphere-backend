@@ -42,6 +42,8 @@ export class AppGateway
    * @param client
    */
   async handleConnection(client: Socket) {
+    this.logger.log('连接成功 ...');
+    this.logger.log(client.handshake);
     const auth: { [p: string]: any } = client.handshake.auth;
     this.logger.log('登录的用户：', auth.token);
     this.connectCounts += 1;
@@ -53,7 +55,7 @@ export class AppGateway
     this.users.set(`${auth.token}**${client.id}`, user);
 
     this.ws.emit('enter', this.users.get(`${auth.token}**${client.id}`));
-    //client.emit('enterName', this.users[client.id]);
+    client.emit('enterName', this.users[client.id]);
   }
 
   /**
@@ -61,6 +63,7 @@ export class AppGateway
    * @param client
    */
   handleDisconnect(client: Socket) {
+    this.logger.log('断开连接 ...');
     const auth: { [p: string]: any } = client.handshake.auth;
     console.log('已经离开:', `${auth.token}**${client.id}`);
     this.allNum -= 1;
@@ -88,7 +91,13 @@ export class AppGateway
    * 监听修改名称
    */
   handleName(client: Socket, data: any): void {
+    console.log('2222', data);
     // this.users[client.id] = data;
     // client.emit('name', this.users[client.id]);
+  }
+
+  sendMessage() {
+    // console.log(1111, this.users);
+    this.ws.emit('message', '你好我是服务器');
   }
 }

@@ -47,9 +47,8 @@ export class UserService {
         },
       ],
     });
-    console.log(1111, existUser);
     if (existUser) {
-      let message = '';
+      let message = '已有用户注册';
       if (existUser.phone === phone) {
         message = '该手机已存在';
       } else if (existUser.email === email) {

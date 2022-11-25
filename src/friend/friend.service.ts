@@ -24,9 +24,11 @@ export class FriendService {
       where: [
         {
           senderId: uid,
+          deletedId: null,
         },
         {
           receiverId: uid,
+          deletedId: null,
         },
       ],
     });
@@ -34,17 +36,16 @@ export class FriendService {
       const userFriend = userFriends[i];
       const { receiverId, senderId } = userFriend;
       const friendId = userFriend.senderId === uid ? receiverId : senderId;
-      userFriend.friendInfo = await this.userService.findUserByCondition(
-        friendId,
-        {
-          includeBanned: true,
-        },
-      );
+      userFriend.friendInfo = await this.userService.findUserById(friendId, {
+        includeBanned: true,
+      });
     }
     return userFriends.filter((userFriend) => {
+      if (!query) {
+        return true;
+      }
       const { receiverId, senderId, friendInfo, senderRemark, receiverRemark } =
         userFriend;
-
       if (friendInfo.id === receiverId) {
         //先看备注是否包含文字
         if (senderRemark.includes(query)) {

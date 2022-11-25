@@ -187,38 +187,44 @@ export class UserService {
     return user;
   }
 
-  async findUserByCondition(
+  /**
+   *
+   * @param uId 用户的id
+   * @param config
+   */
+  async findUserById(
     uId: string,
     config?: {
       includeBanned?: boolean;
       query?: string;
+      precise?: boolean;
     },
   ) {
+    const { precise, query } = config;
     const condition: any = {};
     if (!config?.includeBanned) {
       condition.banned = Not(true);
     }
-    // console.log(111, condition);
     return await this.userRepository.findOne({
       where: [
         {
           id: uId,
-          username: ILike(`%${config?.query ?? ''}%`),
+          username: precise ? query : ILike(`%${config?.query ?? ''}%`),
           ...condition,
         },
         {
           id: uId,
-          nickname: ILike(`%${config?.query ?? ''}%`),
+          nickname: precise ? query : ILike(`%${config?.query ?? ''}%`),
           ...condition,
         },
         {
           id: uId,
-          phone: ILike(`%${config?.query ?? ''}%`),
+          phone: query,
           ...condition,
         },
         {
           id: uId,
-          email: ILike(`%${config?.query ?? ''}%`),
+          email: precise ? query : ILike(`%${config?.query ?? ''}%`),
           ...condition,
         },
       ],

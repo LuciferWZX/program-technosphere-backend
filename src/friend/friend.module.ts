@@ -8,12 +8,13 @@ import { UserFriends } from '../entity/userFriends.entity';
 import { UserService } from '../user/user.service';
 import { UserModule } from '../user/user.module';
 import { User } from '../entity/user.entity';
+import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
 
 @Module({
   controllers: [FriendController],
   providers: [FriendService, UserService],
   imports: [
-    TypeOrmModule.forFeature([UserFriends, User]),
+    TypeOrmModule.forFeature([UserFriends, User, UserFriendRequestRecord]),
     CacheModule,
     AuthModule,
   ],

@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entity/user.entity';
 import { ILike, Like, Repository } from 'typeorm';
 import { UserFriends } from '../entity/userFriends.entity';
 import { UserService } from '../user/user.service';
+import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
 
 @Injectable()
 export class FriendService {
   constructor(
     @InjectRepository(UserFriends)
     private readonly userFriendsRepository: Repository<UserFriends>,
+    @InjectRepository(UserFriendRequestRecord)
+    private readonly userFriendRequestRecordRepository: Repository<UserFriendRequestRecord>,
 
     private readonly userService: UserService,
   ) {}
@@ -71,6 +73,47 @@ export class FriendService {
           phone === query
         );
       }
+    });
+  }
+
+  async sendFriendRequest(params: {
+    uid: string;
+    fid: string;
+    desc?: string;
+  }): Promise<UserFriendRequestRecord> {
+    const { uid, fid, desc } = params;
+    const existRecord = await this.userFriendRequestRecordRepository.findOne({
+      where: [
+        {
+          senderId: uid,
+          receiverId: fid,
+        },
+        {
+          senderId: fid,
+          receiverId: uid,
+        },
+      ],
+    });
+    if (existRecord) {
+      let message = '';
+      if (existRecord.senderId === uid) {
+        message = '您已发送该请求，等待对方回应';
+      }
+      if (existRecord.receiverId === uid) {
+        message = '对方已发送请求，等待您的回应';
+      }
+      throw new HttpException(
+        {
+          message: message,
+          code: 10000,
+        },
+        400,
+      );
+    }
+    return await this.userFriendRequestRecordRepository.save({
+      senderId: uid,
+      receiverId: fid,
+      senderDesc: desc,
     });
   }
 }

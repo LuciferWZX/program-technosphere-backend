@@ -17,6 +17,7 @@ import configuration from '../config/configuration';
 import { AuthorityMiddleware } from './middleware/authority.middleware';
 import { AuthModule } from './auth/auth.module';
 import { AppGateway } from './app.gateway';
+import { FriendModule } from './friend/friend.module';
 
 @Dependencies(Connection)
 @Module({
@@ -57,6 +58,7 @@ import { AppGateway } from './app.gateway';
     UserModule,
     CacheModule,
     AuthModule,
+    FriendModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppGateway],

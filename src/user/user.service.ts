@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entity/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Not, Repository } from 'typeorm';
 import { CacheService } from '../cache/cache.service';
 import { clearOnlineUser, getOnlineUser } from './utils';
 import { HashMapKey } from '../types/cache-type';
@@ -185,5 +185,43 @@ export class UserService {
       );
     }
     return user;
+  }
+
+  async findUserByCondition(
+    uId: string,
+    config?: {
+      includeBanned?: boolean;
+      query?: string;
+    },
+  ) {
+    const condition: any = {};
+    if (!config?.includeBanned) {
+      condition.banned = Not(true);
+    }
+    // console.log(111, condition);
+    return await this.userRepository.findOne({
+      where: [
+        {
+          id: uId,
+          username: ILike(`%${config?.query ?? ''}%`),
+          ...condition,
+        },
+        {
+          id: uId,
+          nickname: ILike(`%${config?.query ?? ''}%`),
+          ...condition,
+        },
+        {
+          id: uId,
+          phone: ILike(`%${config?.query ?? ''}%`),
+          ...condition,
+        },
+        {
+          id: uId,
+          email: ILike(`%${config?.query ?? ''}%`),
+          ...condition,
+        },
+      ],
+    });
   }
 }

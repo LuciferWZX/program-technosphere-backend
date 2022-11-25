@@ -1,0 +1,15 @@
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { EController } from '../constants/controller';
+import { FriendService } from '../friend/friend.service';
+
+@Controller(EController.friend)
+export class FriendController {
+  constructor(private readonly friendService: FriendService) {}
+
+  @Post('get_friends_list')
+  async getFriendsList(@Body() filter: { uid: string; query?: string }) {
+    const { uid, query } = filter;
+    const data = this.friendService.getFriendsList(uid, query);
+    return data;
+  }
+}

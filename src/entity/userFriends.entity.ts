@@ -3,13 +3,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity({
   name: 'tb_user_friends',
 })
-export class UserFriendsEntity extends BaseEntity {
+export class UserFriends extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
   @Column({ nullable: false })
@@ -28,4 +31,6 @@ export class UserFriendsEntity extends BaseEntity {
   updatedDate: Date; ///更新的时间
   @Column({ nullable: true })
   deletedId: string; ///主动删除好友的id
+
+  friendInfo: User;
 }

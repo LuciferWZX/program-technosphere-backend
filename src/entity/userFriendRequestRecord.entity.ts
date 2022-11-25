@@ -9,7 +9,7 @@ import { FriendRequestRecordStatusType, ResponseStatusType } from './type';
 @Entity({
   name: 'tb_user_friends_record',
 })
-export class UserFriendRequestRecordEntity extends BaseEntity {
+export class UserFriendRequestRecord extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
   @Column({ nullable: true })

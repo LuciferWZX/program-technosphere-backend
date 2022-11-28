@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserFriends } from '../entity/userFriends.entity';
 import { UserService } from '../user/user.service';
 import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
@@ -77,6 +77,10 @@ export class FriendService {
     });
   }
 
+  /**
+   * 发送好友请求
+   * @param params
+   */
   async sendFriendRequest(params: {
     uid: string;
     fid: string;

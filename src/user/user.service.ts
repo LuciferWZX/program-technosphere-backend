@@ -230,4 +230,24 @@ export class UserService {
       ],
     });
   }
+
+  async searchUsers(params: {
+    uid: string;
+    query?: string;
+    includeSelf?: boolean;
+  }) {
+    const { query, uid, includeSelf } = params;
+    const condition: any = {};
+    if (!includeSelf) {
+      condition.id = Not(uid);
+    }
+    return await this.userRepository.find({
+      where: [
+        { email: query, ...condition },
+        { nickname: ILike(`%${query ?? ''}%`), ...condition },
+        { username: query, ...condition },
+        { phone: query, ...condition },
+      ],
+    });
+  }
 }

@@ -61,6 +61,7 @@ export class UserController {
    * @param loginByEmail
    */
   @Post('login_with_email')
+  @HttpCode(200)
   @Bind(Req())
   async emailLogin(request, @Body() loginByEmail: LoginByEmailDto) {
     const { email, password, keepLogin } = loginByEmail;

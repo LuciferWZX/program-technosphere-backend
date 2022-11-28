@@ -1,4 +1,4 @@
-import { Bind, Body, Controller, Post, Req } from '@nestjs/common';
+import { Bind, Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
 import { EController } from '../constants/controller';
 import { FriendService } from './friend.service';
 import { Request } from 'express';
@@ -45,8 +45,12 @@ export class FriendController {
     });
   }
   @Post('search_users')
+  @HttpCode(200)
   @Bind(Req())
   async searchUsers(request: Request, @Body() params: { query?: string }) {
+    if (!params.query) {
+      return [];
+    }
     const token = request.headers['authorization'];
     const uid = getUserIdByToken(token);
     return this.userService.searchUsers({

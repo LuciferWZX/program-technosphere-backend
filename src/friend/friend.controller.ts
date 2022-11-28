@@ -1,20 +1,29 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Bind, Body, Controller, Post, Req } from '@nestjs/common';
 import { EController } from '../constants/controller';
-import { FriendService } from '../friend/friend.service';
+import { FriendService } from './friend.service';
+import { Request } from 'express';
 
 @Controller(EController.friend)
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}
 
   @Post('get_friends_list')
-  async getFriendsList(@Body() filter: { uid: string; query?: string }) {
-    const { uid, query } = filter;
+  @Bind(Req())
+  async getFriendsList(request: Request, @Body() filter: { query?: string }) {
+    const uid = request.headers['authorization'];
+    const { query } = filter;
     return this.friendService.getFriendsList(uid, query);
   }
   @Post('send_request')
+  @Bind(Req())
   async sendRequest(
-    @Body() request: { uid: string; fid: string; desc?: string },
+    request: Request,
+    @Body() params: { fid: string; desc?: string },
   ) {
-    return this.friendService.sendFriendRequest(request);
+    const uid = request.headers['authorization'];
+    return this.friendService.sendFriendRequest({
+      uid,
+      ...params,
+    });
   }
 }

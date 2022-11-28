@@ -13,8 +13,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
-    Logger.log('request:', request);
-    Logger.log('错误提示', exception.response);
+    Logger.error(`[${exception.response.message}]`);
     let message;
     let code = 10000;
     if (exception.response?.code !== undefined) {

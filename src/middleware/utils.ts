@@ -42,7 +42,9 @@ export const verifyToken = async (
     HashMapKey.Users,
     userId,
   );
-
+  console.log(11111, token);
+  console.log(111112, userId);
+  console.log(2222, user);
   if (user) {
     //先检查是否有登录的账号设备
     for (const device in user) {

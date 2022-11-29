@@ -28,6 +28,7 @@ export class UserController {
   ) {}
 
   @Get('fetch_user_info')
+  @HttpCode(200)
   @Bind(Req())
   async fetchUserInfo(request) {
     const token = request.headers?.authorization;
@@ -39,6 +40,7 @@ export class UserController {
    * @param registerByEmailDto
    */
   @Post('register_with_email')
+  @HttpCode(200)
   async emailRegistration(
     @Body() registerByEmailDto: RegisterByEmailDto,
   ): Promise<any> {
@@ -108,6 +110,7 @@ export class UserController {
   }
 
   @Post('logout')
+  @HttpCode(200)
   @Bind(Req())
   async logout(request) {
     const token = request.headers?.authorization;
@@ -136,5 +139,10 @@ export class UserController {
     return this.userService.getUserDetail({
       uid: params.uid,
     });
+  }
+  @Get('check_token')
+  @HttpCode(200)
+  async checkToken() {
+    return 'ok';
   }
 }

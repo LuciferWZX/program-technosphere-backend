@@ -43,7 +43,6 @@ export class AppGateway
    */
   async handleConnection(client: Socket) {
     this.logger.log('连接成功 ...');
-    this.logger.log(client.handshake);
     const auth: { [p: string]: any } = client.handshake.auth;
     this.logger.log('登录的用户：', auth.token);
     this.connectCounts += 1;
@@ -91,7 +90,7 @@ export class AppGateway
    * 监听修改名称
    */
   handleName(client: Socket, data: any): void {
-    console.log('2222', data);
+    console.log('handleName', data);
     // this.users[client.id] = data;
     // client.emit('name', this.users[client.id]);
   }

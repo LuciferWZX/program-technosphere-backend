@@ -21,6 +21,7 @@ export class AuthorityMiddleware implements NestMiddleware {
       );
     }
     const user = await verifyToken(token, this.cacheService, this.authService);
+
     //验证token是否正确
     // const user = await tokenVerify(token, this.cacheService, this.authService);
 

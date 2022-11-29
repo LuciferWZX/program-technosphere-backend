@@ -69,8 +69,8 @@ export class AppModule implements NestModule {
       .apply(AuthorityMiddleware)
       .forRoutes(
         {
-          path: 'user/test',
-          method: RequestMethod.ALL,
+          path: 'user/check_token',
+          method: RequestMethod.GET,
         },
         {
           path: 'friend/*',

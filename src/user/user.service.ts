@@ -250,4 +250,13 @@ export class UserService {
       ],
     });
   }
+
+  async getUserDetail(params: { uid: string }) {
+    const { uid } = params;
+    return await this.userRepository.findOne({
+      where: {
+        id: uid,
+      },
+    });
+  }
 }

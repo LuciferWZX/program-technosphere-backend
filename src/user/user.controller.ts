@@ -129,4 +129,12 @@ export class UserController {
       console.log('insert');
     }
   }
+
+  @Post('get_user_details')
+  @HttpCode(200)
+  async getUserDetails(@Body() params: { uid: string }) {
+    return this.userService.getUserDetail({
+      uid: params.uid,
+    });
+  }
 }

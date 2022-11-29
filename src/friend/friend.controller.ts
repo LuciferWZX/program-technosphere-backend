@@ -18,6 +18,7 @@ export class FriendController {
    * @param filter
    */
   @Post('get_friends_list')
+  @HttpCode(200)
   @Bind(Req())
   async getFriendsList(request: Request, @Body() filter: { query?: string }) {
     const token = request.headers['authorization'];
@@ -32,10 +33,11 @@ export class FriendController {
    * @param params
    */
   @Post('send_request')
+  @HttpCode(200)
   @Bind(Req())
   async sendRequest(
     request: Request,
-    @Body() params: { fid: string; desc?: string },
+    @Body() params: { fid: string; senderDesc?: string; senderRemark?: string },
   ) {
     const token = request.headers['authorization'];
     const uid = getUserIdByToken(token);

@@ -1,9 +1,10 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { UserFriends } from '../entity/userFriends.entity';
 import { UserService } from '../user/user.service';
 import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
+import { ResponseStatusType } from '../entity/type';
 
 @Injectable()
 export class FriendService {
@@ -84,28 +85,66 @@ export class FriendService {
   async sendFriendRequest(params: {
     uid: string;
     fid: string;
-    desc?: string;
+    senderDesc?: string;
+    senderRemark?: string;
   }): Promise<UserFriendRequestRecord> {
-    const { uid, fid, desc } = params;
+    const { uid, fid, senderDesc } = params;
+    ///@todo 首先查看这两人是否是好友
+    const friendRecord = await this.userFriendsRepository.findOne({
+      where: [
+        {
+          senderId: uid,
+          receiverId: fid,
+          deletedId: null,
+        },
+        {
+          senderId: fid,
+          receiverId: uid,
+          deletedId: null,
+        },
+      ],
+    });
+    ///存在说明已经是好友了
+    if (friendRecord) {
+      throw new HttpException(
+        {
+          message: '你们已经是好友了',
+          code: 10000,
+        },
+        400,
+      );
+    }
+    ///@todo 两人不是好友就查看是否有请求消息，有的话就不添加记录，没有的话就添加一条记录
     const existRecord = await this.userFriendRequestRecordRepository.findOne({
       where: [
         {
           senderId: uid,
           receiverId: fid,
+          responseStatus: Not(ResponseStatusType.Refused),
         },
         {
           senderId: fid,
           receiverId: uid,
+          responseStatus: Not(ResponseStatusType.Refused),
         },
       ],
     });
     if (existRecord) {
       let message = '';
       if (existRecord.senderId === uid) {
-        message = '您已发送该请求，等待对方回应';
+        if (existRecord.responseStatus === ResponseStatusType.Handling) {
+          message = '您已发送该请求，等待对方回应';
+        } else if (existRecord.responseStatus === ResponseStatusType.Accepted) {
+          message = '你们已经是好友了';
+        }
       }
       if (existRecord.receiverId === uid) {
-        message = '对方已发送请求，等待您的回应';
+        if (existRecord.responseStatus === ResponseStatusType.Handling) {
+          ///当我添加别人的时候发现那个人已经发送了我请求好友的消息，这时候直接就添加了好友
+          ///@todo 成功添加好友
+        } else if (existRecord.responseStatus === ResponseStatusType.Accepted) {
+          message = '你们已经是好友了';
+        }
       }
       throw new HttpException(
         {
@@ -118,7 +157,7 @@ export class FriendService {
     return await this.userFriendRequestRecordRepository.save({
       senderId: uid,
       receiverId: fid,
-      senderDesc: desc,
+      senderDesc: senderDesc,
     });
   }
 }

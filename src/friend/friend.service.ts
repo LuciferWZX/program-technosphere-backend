@@ -206,6 +206,7 @@ export class FriendService {
         };
       }
     }
+    console.log(1111, recordList);
     return recordList;
   }
 }

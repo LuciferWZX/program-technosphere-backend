@@ -96,7 +96,7 @@ export class UserService {
           message: '邮箱或者密码错误，请输入正确的邮箱和密码',
           code: 10001,
         },
-        401,
+        402,
       );
     }
     if (user.banned) {
@@ -106,7 +106,7 @@ export class UserService {
           message: '该用户已被禁用，请联系管理员',
           code: 10002,
         },
-        401,
+        402,
       );
     }
     return user;
@@ -131,7 +131,7 @@ export class UserService {
           message: '电话号码或者PIN码错误',
           code: 10001,
         },
-        401,
+        402,
       );
     }
     if (user.banned) {
@@ -141,7 +141,7 @@ export class UserService {
           message: '该用户已被禁用，请联系管理员',
           code: 10002,
         },
-        401,
+        402,
       );
     }
     return user;

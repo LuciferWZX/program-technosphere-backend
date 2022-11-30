@@ -4,7 +4,10 @@ import { Not, Repository } from 'typeorm';
 import { UserFriends } from '../entity/userFriends.entity';
 import { UserService } from '../user/user.service';
 import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
-import { ResponseStatusType } from '../entity/type';
+import {
+  FriendRequestRecordStatusType,
+  ResponseStatusType,
+} from '../entity/type';
 
 @Injectable()
 export class FriendService {
@@ -159,5 +162,50 @@ export class FriendService {
       receiverId: fid,
       senderDesc: senderDesc,
     });
+  }
+
+  /**
+   * 查询该用户的好友请求
+   * @param params
+   */
+  async getFriendRecords(params: { id: string }) {
+    const { id } = params;
+    const recordList = await this.userFriendRequestRecordRepository.find({
+      where: [
+        {
+          receiverId: id,
+          deleteStatus: FriendRequestRecordStatusType.ReceiverDeleted,
+        },
+        {
+          senderId: id,
+          deleteStatus: FriendRequestRecordStatusType.SenderDeleted,
+        },
+      ],
+    });
+
+    for (let i = 0; i < recordList.length; i++) {
+      const record = recordList[i];
+      if (record.receiverId === id) {
+        ///我是接收人，所有查询senderId的信息
+        const friend = await this.userService.findUserById(record.senderId);
+        record.friendInfo = {
+          id: friend.id,
+          nickname: friend.nickname,
+          username: friend.username,
+          avatar: friend.avatar,
+        };
+      }
+      if (record.senderId === id) {
+        ///我是接收人，所有查询senderId的信息
+        const friend = await this.userService.findUserById(record.receiverId);
+        record.friendInfo = {
+          id: friend.id,
+          nickname: friend.nickname,
+          username: friend.username,
+          avatar: friend.avatar,
+        };
+      }
+    }
+    return recordList;
   }
 }

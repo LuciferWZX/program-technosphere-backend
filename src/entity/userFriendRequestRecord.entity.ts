@@ -20,7 +20,7 @@ export class UserFriendRequestRecord extends BaseEntity {
   createdDate: Date; ///创建的时间
   @CreateDateColumn()
   updatedDate: Date; ///更新的时间
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   senderDesc: string; ///请求描述
   @Column({ type: 'varchar', length: 50, nullable: true })
   denialReason: string; ///拒绝原因
@@ -36,4 +36,11 @@ export class UserFriendRequestRecord extends BaseEntity {
     default: FriendRequestRecordStatusType.NotDeleted,
   })
   deleteStatus: FriendRequestRecordStatusType; ///两者对这个记录是否删除
+
+  friendInfo?: {
+    id: string;
+    nickname: string;
+    username: string;
+    avatar: string;
+  };
 }

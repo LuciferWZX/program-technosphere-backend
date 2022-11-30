@@ -1,9 +1,17 @@
-import { Bind, Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
+import {
+  Bind,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { EController } from '../constants/controller';
 import { FriendService } from './friend.service';
 import { Request } from 'express';
 import { UserService } from '../user/user.service';
-import { getUserIdByToken } from '../utils/util';
+import { getIdFromRequest } from '../utils/util';
 
 @Controller(EController.friend)
 export class FriendController {
@@ -21,8 +29,7 @@ export class FriendController {
   @HttpCode(200)
   @Bind(Req())
   async getFriendsList(request: Request, @Body() filter: { query?: string }) {
-    const token = request.headers['authorization'];
-    const uid = getUserIdByToken(token);
+    const uid = getIdFromRequest(request);
     const { query } = filter;
     return this.friendService.getFriendsList(uid, query);
   }
@@ -39,8 +46,7 @@ export class FriendController {
     request: Request,
     @Body() params: { fid: string; senderDesc?: string; senderRemark?: string },
   ) {
-    const token = request.headers['authorization'];
-    const uid = getUserIdByToken(token);
+    const uid = getIdFromRequest(request);
     return this.friendService.sendFriendRequest({
       uid,
       ...params,
@@ -53,11 +59,20 @@ export class FriendController {
     if (!params.query) {
       return [];
     }
-    const token = request.headers['authorization'];
-    const uid = getUserIdByToken(token);
+    const uid = getIdFromRequest(request);
     return this.userService.searchUsers({
       uid,
       query: params.query,
+    });
+  }
+
+  @Get('get_friend_requests')
+  @HttpCode(200)
+  @Bind(Req())
+  async getFriendRequestList(request: Request) {
+    const uid = getIdFromRequest(request);
+    return this.friendService.getFriendRecords({
+      id: uid,
     });
   }
 }

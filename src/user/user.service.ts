@@ -200,7 +200,6 @@ export class UserService {
       precise?: boolean;
     },
   ) {
-    const { precise, query } = config;
     const condition: any = {};
     if (!config?.includeBanned) {
       condition.banned = Not(true);
@@ -209,22 +208,28 @@ export class UserService {
       where: [
         {
           id: uId,
-          username: precise ? query : ILike(`%${config?.query ?? ''}%`),
+          username: config?.precise
+            ? config.query
+            : ILike(`%${config?.query ?? ''}%`),
           ...condition,
         },
         {
           id: uId,
-          nickname: precise ? query : ILike(`%${config?.query ?? ''}%`),
+          nickname: config?.precise
+            ? config?.query
+            : ILike(`%${config?.query ?? ''}%`),
           ...condition,
         },
         {
           id: uId,
-          phone: query,
+          phone: config?.query,
           ...condition,
         },
         {
           id: uId,
-          email: precise ? query : ILike(`%${config?.query ?? ''}%`),
+          email: config?.precise
+            ? config?.query
+            : ILike(`%${config?.query ?? ''}%`),
           ...condition,
         },
       ],

@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { DataSource, In, Not, Repository } from 'typeorm';
 import { UserFriends } from '../entity/userFriends.entity';
 import { UserService } from '../user/user.service';
 import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
@@ -12,6 +12,7 @@ import {
 @Injectable()
 export class FriendService {
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(UserFriends)
     private readonly userFriendsRepository: Repository<UserFriends>,
     @InjectRepository(UserFriendRequestRecord)
@@ -174,15 +175,20 @@ export class FriendService {
       where: [
         {
           receiverId: id,
-          deleteStatus: FriendRequestRecordStatusType.ReceiverDeleted,
+          deleteStatus: In([
+            `${FriendRequestRecordStatusType.NotDeleted}`,
+            `${FriendRequestRecordStatusType.SenderDeleted}`,
+          ]),
         },
         {
           senderId: id,
-          deleteStatus: FriendRequestRecordStatusType.SenderDeleted,
+          deleteStatus: In([
+            `${FriendRequestRecordStatusType.NotDeleted}`,
+            `${FriendRequestRecordStatusType.ReceiverDeleted}`,
+          ]),
         },
       ],
     });
-
     for (let i = 0; i < recordList.length; i++) {
       const record = recordList[i];
       if (record.receiverId === id) {
@@ -206,7 +212,72 @@ export class FriendService {
         };
       }
     }
-    console.log(1111, recordList);
     return recordList;
+  }
+
+  async handleFriendRequest(params: {
+    rid: string;
+    fRecordId: string;
+    fid: string;
+    senderRemark?: string;
+    status: ResponseStatusType;
+  }) {
+    const { fRecordId, fid, status, rid } = params;
+
+    return await this.dataSource.transaction(
+      async (transactionalEntityManager) => {
+        if (status === ResponseStatusType.Accepted) {
+          const existRecord = await transactionalEntityManager
+            .getRepository(UserFriends)
+            .createQueryBuilder('record')
+            .where(
+              'record.senderId=:senderId AND record.receiverId=:receiverId',
+              {
+                senderId: fid,
+                receiverId: rid,
+              },
+            )
+            .orWhere('record.senderId=:sid AND record.receiverId=:rid', {
+              sid: rid,
+              rid: fid,
+            })
+            .getOne();
+          if (existRecord) {
+            throw new HttpException(
+              {
+                message: '已经是好友了，无法重复添加好友',
+                code: 10001,
+              },
+              402,
+            );
+          }
+        }
+
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .update(UserFriendRequestRecord)
+          .set({
+            responseStatus: status,
+          })
+          .where('id= :fRecordId AND senderId= :fid', {
+            fRecordId: fRecordId,
+            fid: fid,
+          })
+          .execute();
+        if (status === ResponseStatusType.Accepted) {
+          await transactionalEntityManager
+            .createQueryBuilder()
+            .insert()
+            .into(UserFriends)
+            .values({
+              fRecordId: fRecordId,
+              senderId: fid,
+              senderRemark: params.senderRemark,
+              receiverId: rid,
+            })
+            .execute();
+        }
+      },
+    );
   }
 }

@@ -12,6 +12,7 @@ import { FriendService } from './friend.service';
 import { Request } from 'express';
 import { UserService } from '../user/user.service';
 import { getIdFromRequest } from '../utils/util';
+import { ResponseStatusType } from '../entity/type';
 
 @Controller(EController.friend)
 export class FriendController {
@@ -73,6 +74,25 @@ export class FriendController {
     const uid = getIdFromRequest(request);
     return this.friendService.getFriendRecords({
       id: uid,
+    });
+  }
+  @Post('handle_friend_request')
+  @HttpCode(200)
+  @Bind(Req())
+  async handleFriendRequest(
+    request: Request,
+    @Body()
+    params: {
+      fRecordId: string;
+      fid: string;
+      status: ResponseStatusType;
+      senderRemark?: string;
+    },
+  ) {
+    const uid = getIdFromRequest(request);
+    return this.friendService.handleFriendRequest({
+      rid: uid,
+      ...params,
     });
   }
 }

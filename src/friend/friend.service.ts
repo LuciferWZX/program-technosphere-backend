@@ -215,6 +215,10 @@ export class FriendService {
     return recordList;
   }
 
+  /**
+   * 接受，拒绝添加好友
+   * @param params
+   */
   async handleFriendRequest(params: {
     rid: string;
     fRecordId: string;
@@ -223,7 +227,6 @@ export class FriendService {
     status: ResponseStatusType;
   }) {
     const { fRecordId, fid, status, rid } = params;
-
     return await this.dataSource.transaction(
       async (transactionalEntityManager) => {
         if (status === ResponseStatusType.Accepted) {

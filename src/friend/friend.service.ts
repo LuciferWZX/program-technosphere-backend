@@ -41,7 +41,7 @@ export class FriendService {
     });
     for (let i = 0; i < userFriends.length; i++) {
       const userFriend = userFriends[i];
-      const { receiverId, senderId } = userFriend;
+      const { receiverId, senderId, senderRemark } = userFriend;
       const friendId = userFriend.senderId === uid ? receiverId : senderId;
       userFriend.friendInfo = await this.userService.findUserById(friendId, {
         includeBanned: true,
@@ -92,7 +92,7 @@ export class FriendService {
     senderDesc?: string;
     senderRemark?: string;
   }): Promise<UserFriendRequestRecord> {
-    const { uid, fid, senderDesc } = params;
+    const { uid, fid, senderDesc, senderRemark } = params;
     ///@todo 首先查看这两人是否是好友
     const friendRecord = await this.userFriendsRepository.findOne({
       where: [
@@ -162,6 +162,7 @@ export class FriendService {
       senderId: uid,
       receiverId: fid,
       senderDesc: senderDesc,
+      senderRemark: senderRemark,
     });
   }
 

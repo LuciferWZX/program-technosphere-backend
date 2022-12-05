@@ -22,6 +22,8 @@ export class UserFriendRequestRecord extends BaseEntity {
   updatedDate: Date; ///更新的时间
   @Column({ type: 'varchar', length: 50, nullable: true })
   senderDesc: string; ///请求描述
+  @Column({ nullable: true })
+  senderRemark: string; ///发送方对接收方的备注
   @Column({ type: 'varchar', length: 50, nullable: true })
   denialReason: string; ///拒绝原因
   @Column({

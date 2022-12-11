@@ -9,6 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const http = configService.get('http');
+  app.enableCors();
   app.setGlobalPrefix(http.app_global_prefix); //设置请求的前缀
   app.useGlobalPipes(new ValidationPipe());
   // 全局注册错误的过滤器

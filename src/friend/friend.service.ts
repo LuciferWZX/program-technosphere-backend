@@ -284,4 +284,62 @@ export class FriendService {
       },
     );
   }
+
+  async modifyFriendRemark(params: {
+    uid: string;
+    id: string;
+    remark?: string;
+  }) {
+    const { uid, id, remark } = params;
+    let newRecord: UserFriends;
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
+      const record = await transactionalEntityManager
+        .createQueryBuilder()
+        .select('record')
+        .from(UserFriends, 'record')
+        .where('record.id = :id', { id: id })
+        .getOne();
+      if (!record) {
+        throw new HttpException(
+          {
+            message: '该记录不存在，无法修改',
+            code: 10001,
+          },
+          402,
+        );
+      }
+      if (record.receiverId === uid) {
+        //更新到 record.receiverRemark
+        return await transactionalEntityManager
+          .createQueryBuilder()
+          .update(UserFriends)
+          .set({
+            receiverRemark: remark,
+          })
+          .where('id= :id', {
+            id: id,
+          })
+          .execute();
+      } else {
+        //更新到 record.senderRemark
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .update(UserFriends)
+          .set({
+            senderRemark: remark,
+          })
+          .where('id= :id', {
+            id: id,
+          })
+          .execute();
+        newRecord = await transactionalEntityManager
+          .createQueryBuilder()
+          .select('record')
+          .from(UserFriends, 'record')
+          .where('record.id = :id', { id: id })
+          .getOne();
+      }
+    });
+    return newRecord;
+  }
 }

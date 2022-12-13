@@ -95,4 +95,24 @@ export class FriendController {
       ...params,
     });
   }
+
+  @Post('modify_friend_remark')
+  @HttpCode(200)
+  @Bind(Req())
+  async modifyFriendRemark(
+    request: Request,
+    @Body()
+    params: {
+      id: string;
+      remark?: string;
+    },
+  ) {
+    const uid = getIdFromRequest(request);
+
+    return this.friendService.modifyFriendRemark({
+      id: params.id,
+      uid: uid,
+      remark: params.remark,
+    });
+  }
 }

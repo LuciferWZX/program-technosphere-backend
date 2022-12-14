@@ -1,16 +1,21 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entity/user.entity';
-import { ILike, Not, Repository } from 'typeorm';
+import { ILike, In, Not, Repository } from 'typeorm';
 import { CacheService } from '../cache/cache.service';
 import { clearOnlineUser, getOnlineUser } from './utils';
 import { HashMapKey } from '../types/cache-type';
+
+import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
+import { FriendRequestRecordStatusType } from '../entity/type';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserFriendRequestRecord)
+    private readonly userFriendRequestRecordRepository: Repository<UserFriendRequestRecord>,
     private readonly cacheService: CacheService,
   ) {}
 
@@ -246,7 +251,7 @@ export class UserService {
     if (!includeSelf) {
       condition.id = Not(uid);
     }
-    return await this.userRepository.find({
+    const users = await this.userRepository.find({
       where: [
         { email: query, ...condition },
         { nickname: ILike(`%${query ?? ''}%`), ...condition },
@@ -254,6 +259,7 @@ export class UserService {
         { phone: query, ...condition },
       ],
     });
+    return users;
   }
 
   async getUserDetail(params: { uid: string }) {

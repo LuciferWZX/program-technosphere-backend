@@ -13,12 +13,15 @@ import { Request } from 'express';
 import { UserService } from '../user/user.service';
 import { getIdFromRequest } from '../utils/util';
 import { ResponseStatusType } from '../entity/type';
+import { AppGateway } from '../app.gateway';
+import { DataType } from '../types/socketDataType';
 
 @Controller(EController.friend)
 export class FriendController {
   constructor(
     private readonly friendService: FriendService,
     private readonly userService: UserService,
+    private readonly appGateway: AppGateway,
   ) {}
 
   /**
@@ -48,10 +51,15 @@ export class FriendController {
     @Body() params: { fid: string; senderDesc?: string; senderRemark?: string },
   ) {
     const uid = getIdFromRequest(request);
-    return this.friendService.sendFriendRequest({
+
+    const data = await this.friendService.sendFriendRequest({
       uid,
       ...params,
     });
+    this.appGateway.wsEmit(params.fid, {
+      type: DataType.updateFriendRecord,
+    });
+    return data;
   }
   @Post('search_users')
   @HttpCode(200)
@@ -90,10 +98,14 @@ export class FriendController {
     },
   ) {
     const uid = getIdFromRequest(request);
-    return this.friendService.handleFriendRequest({
+    const data = await this.friendService.handleFriendRequest({
       rid: uid,
       ...params,
     });
+    this.appGateway.wsEmit(params.fid, {
+      type: DataType.updateFriendRecord,
+    });
+    return data;
   }
 
   @Post('modify_friend_remark')

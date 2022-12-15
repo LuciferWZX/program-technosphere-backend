@@ -108,6 +108,7 @@ export class FriendService {
         },
       ],
     });
+
     ///存在说明已经是好友了
     if (friendRecord) {
       throw new HttpException(
@@ -124,31 +125,26 @@ export class FriendService {
         {
           senderId: uid,
           receiverId: fid,
-          responseStatus: Not(ResponseStatusType.Refused),
+          responseStatus: Not(ResponseStatusType.Handling),
         },
         {
           senderId: fid,
           receiverId: uid,
-          responseStatus: Not(ResponseStatusType.Refused),
+          responseStatus: Not(ResponseStatusType.Handling),
         },
       ],
     });
-    if (existRecord) {
+
+    if (
+      existRecord &&
+      existRecord.responseStatus === ResponseStatusType.Handling
+    ) {
       let message = '';
       if (existRecord.senderId === uid) {
-        if (existRecord.responseStatus === ResponseStatusType.Handling) {
-          message = '您已发送该请求，等待对方回应';
-        } else if (existRecord.responseStatus === ResponseStatusType.Accepted) {
-          message = '你们已经是好友了';
-        }
+        message = '您已发送该请求，等待对方回应';
       }
       if (existRecord.receiverId === uid) {
-        if (existRecord.responseStatus === ResponseStatusType.Handling) {
-          ///当我添加别人的时候发现那个人已经发送了我请求好友的消息，这时候直接就添加了好友
-          ///@todo 成功添加好友
-        } else if (existRecord.responseStatus === ResponseStatusType.Accepted) {
-          message = '你们已经是好友了';
-        }
+        message = '该用户已发送给你请求，请查收';
       }
       throw new HttpException(
         {
@@ -190,6 +186,7 @@ export class FriendService {
         },
       ],
     });
+
     for (let i = 0; i < recordList.length; i++) {
       const record = recordList[i];
       if (record.receiverId === id) {

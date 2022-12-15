@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { CacheService } from './cache/cache.service';
 import { HashMapKey } from './types/cache-type';
 import { User } from './entity/user.entity';
+import { SocketDataType } from './types/socketDataType';
 @Injectable()
 @WebSocketGateway({
   path: '/socket',
@@ -95,8 +96,16 @@ export class AppGateway
     // client.emit('name', this.users[client.id]);
   }
 
+  /**
+   * 发送消息给客户端指
+   * @param channel
+   * @param data
+   */
+  wsEmit(channel: string, data: SocketDataType) {
+    this.ws.emit(channel, JSON.stringify(data));
+  }
   sendMessage() {
     // console.log(1111, this.users);
-    this.ws.emit('message', '你好我是服务器');
+    this.ws.emit('message', JSON.stringify({ aa: '你好我是服务器' }));
   }
 }

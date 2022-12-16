@@ -18,6 +18,7 @@ import { AuthorityMiddleware } from './middleware/authority.middleware';
 import { AuthModule } from './auth/auth.module';
 import { AppGateway } from './app.gateway';
 import { FriendModule } from './friend/friend.module';
+import { MessageModule } from './message/message.module';
 
 @Dependencies(Connection)
 @Module({
@@ -59,6 +60,7 @@ import { FriendModule } from './friend/friend.module';
     CacheModule,
     AuthModule,
     FriendModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppGateway],

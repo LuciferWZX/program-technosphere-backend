@@ -17,6 +17,8 @@ import { updateUserStatus } from './utils';
 import { getDevice } from '../utils/util';
 import { User } from '../entity/user.entity';
 import { LoginByPhoneDto } from './dtos/login-by-phone.dto';
+import { AppGateway } from '../app.gateway';
+import { DataType } from '../types/socketDataType';
 
 @Controller(EController.User)
 export class UserController {
@@ -25,6 +27,7 @@ export class UserController {
     private readonly cacheService: CacheService,
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly appGateway: AppGateway,
   ) {}
 
   @Get('fetch_user_info')
@@ -128,6 +131,10 @@ export class UserController {
     const result = await updateUserStatus(user, this.cacheService);
     if (result.action === 'update') {
       console.log('update,发送socket信息给当前登录的用户，提示他被踢出了');
+      this.appGateway.wsEmit(user.id, {
+        type: DataType.forceLogout,
+        data: { type: result.data.type },
+      });
     } else {
       console.log('insert');
     }

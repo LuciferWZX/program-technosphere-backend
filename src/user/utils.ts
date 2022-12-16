@@ -9,7 +9,7 @@ import { parseJwt } from '../utils/parseJWT';
 export const updateUserStatus = async (
   newUser: User,
   service: CacheService,
-): Promise<{ action: 'update' | 'online' }> => {
+): Promise<{ action: 'update' | 'online'; data?: any }> => {
   //查询用户在该设备上是否登录
   const userInfo: IRedisUserInfo | undefined = await service.hGet(
     HashMapKey.Users,
@@ -25,6 +25,9 @@ export const updateUserStatus = async (
     await service.hSet(HashMapKey.Users, newUser.id, userInfo);
     return {
       action: 'update',
+      data: {
+        type: newUser.device,
+      },
     };
   } else {
     const newUserInfo: IRedisUserInfo = {
@@ -34,7 +37,10 @@ export const updateUserStatus = async (
       },
     };
     //说明用户没有登录任何设备
-    await service.hSet(HashMapKey.Users, newUser.id, newUserInfo);
+    await service.hSet(HashMapKey.Users, newUser.id, {
+      ...userInfo,
+      ...newUserInfo,
+    });
     return {
       action: 'online',
     };

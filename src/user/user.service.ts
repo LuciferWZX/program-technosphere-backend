@@ -7,7 +7,6 @@ import { clearOnlineUser, getOnlineUser } from './utils';
 import { HashMapKey } from '../types/cache-type';
 
 import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
-import { FriendRequestRecordStatusType } from '../entity/type';
 
 @Injectable()
 export class UserService {

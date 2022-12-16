@@ -37,3 +37,13 @@ export enum FriendRequestRecordStatusType {
   ReceiverDeleted = 2, //接收者删除这个记录
   BothDeleted = 3, //都删除这个记录
 }
+export enum ContentType {
+  text, //文本
+  image, //图片
+  video, //视频
+  voice, //语音
+}
+export enum Result {
+  No = 0, //否
+  Yes = 1, //是
+}

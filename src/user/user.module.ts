@@ -6,10 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entity/user.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UserFriendRequestRecord } from '../entity/userFriendRequestRecord.entity';
+import { AppGateway } from '../app.gateway';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, AppGateway],
   imports: [
     TypeOrmModule.forFeature([User, UserFriendRequestRecord]),
     CacheModule,

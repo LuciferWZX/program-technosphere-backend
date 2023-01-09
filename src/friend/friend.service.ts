@@ -307,7 +307,7 @@ export class FriendService {
       }
       if (record.receiverId === uid) {
         //更新到 record.receiverRemark
-        return await transactionalEntityManager
+        await transactionalEntityManager
           .createQueryBuilder()
           .update(UserFriends)
           .set({
@@ -329,13 +329,13 @@ export class FriendService {
             id: id,
           })
           .execute();
-        newRecord = await transactionalEntityManager
-          .createQueryBuilder()
-          .select('record')
-          .from(UserFriends, 'record')
-          .where('record.id = :id', { id: id })
-          .getOne();
       }
+      newRecord = await transactionalEntityManager
+        .createQueryBuilder()
+        .select('record')
+        .from(UserFriends, 'record')
+        .where('record.id = :id', { id: id })
+        .getOne();
     });
     return newRecord;
   }
